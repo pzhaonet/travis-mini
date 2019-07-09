@@ -1,22 +1,22 @@
 language: r
-cache: packages
+sudo: false
+latex: false
+pandoc: false
+cache:
+  packages: true
+
+git: 
+  depth: 5
+  submodules: false
+
+before_install:
+  - git config --global user.email "baydap@gmail.com"
+  - git config --global user.name "pzhaonet"
 
 script:
-  - bash scripts/_build.sh
+  - Rscript scripts/run.R
 
-branches:
-  only:
-    - master
-
-deploy:
-  skip_cleanup: true
-  provider: script
-  script: bash scripts/_deploy.sh
-  on:
-    branch: master
-
-cache:
-  packages: yes
-  directories:
-    - $TRAVIS_BUILD_DIR
-    
+after_success:
+  - git add -A
+  - git commit -m"travis update"
+  - git push -q https://${GITHUB_PAT}@github.com/pzhaonet/travis-mini.git HEAD:master
