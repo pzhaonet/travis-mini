@@ -1,0 +1,22 @@
+language: r
+cache: packages
+
+script:
+  - bash scripts/_build.sh
+
+branches:
+  only:
+    - master
+
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: bash scripts/_deploy.sh
+  on:
+    branch: master
+
+cache:
+  packages: yes
+  directories:
+    - $TRAVIS_BUILD_DIR
+    
