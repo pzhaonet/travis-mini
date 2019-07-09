@@ -2,7 +2,7 @@ require(lubridate)
 require(magrittr)
 require(xml2)
 require(dplyr)
-require(jsonli5te)
+require(jsonlite)
 
 get_rdevel <- function(ym, site = 'r-devel'){
   # ym <e- today()
