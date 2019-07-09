@@ -2,3 +2,4 @@ Package: placeholderr
 Type: Data
 Title: Does not matter.
 Version: 0.0.1
+Imports: lubridate, magrittr, xml2, dplyr, jsonlite, curl
