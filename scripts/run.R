@@ -94,8 +94,10 @@ calc_df_cos <- function(df){
 message('reading db.Rdata')
 
 RDSfile <- 'db.RData'
-load(RDSfile)
+#load(RDSfile)
 
+con = url('https://github.com/pzhaonet/rchive_travis/raw/master/db.RData')
+load(con)
 message('update db.Rdata...')
 df_coscsv$Month <- as.character(df_coscsv$Month)
 last_update <- difftime(Sys.Date(), as.Date(file.info(RDSfile)$mtime))
