@@ -93,11 +93,11 @@ calc_df_cos <- function(df){
 
 message('reading db.Rdata')
 
-RDSfile <- 'db.RData'
-#load(RDSfile)
+RDSfile <- 'data/db.RData'
+load(RDSfile)
 
-con = url('https://github.com/pzhaonet/rchive_travis/raw/master/db.RData')
-load(con)
+# con = url('https://github.com/pzhaonet/rchive_travis/raw/master/db.RData')
+# load(con)
 message('update db.Rdata...')
 df_coscsv$Month <- as.character(df_coscsv$Month)
 #last_update <- difftime(Sys.Date(), as.Date(file.info(RDSfile)$mtime))
@@ -121,7 +121,7 @@ df_coscsv <- bind_rows(df_coscsv, cos_new)
 df_coscsv <- df_coscsv[!duplicated(df_coscsv$Title), ]
 
 
-RDSfile <- 'db_new.RData'
+# RDSfile <- 'db_new.RData'
 message('Writing db.Rdata...')
 save(file = RDSfile, list = c('df_coscsv', 'df_rdevelcsv', 'df_rhelpcsv'))
 
