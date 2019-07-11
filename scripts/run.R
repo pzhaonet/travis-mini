@@ -8,22 +8,22 @@ get_rdevel <- function(ym, site = 'r-devel'){
   # ym <e- today()
   Month <- format(ym, '%Y-%m')
   ym <- format(ym, '%Y-%B')
-  
+
   url = paste0("https://stat.ethz.ch/pipermail/", site, "/", ym, "/thread.html")
-  
+
   dir = dirname(url)
-  
+
   ## all main thread
-  tmpl = 
+  tmpl =
     read_html(url) %>%
-    xml_find_all("//body/ul[2]/li") 
-  
+    xml_find_all("//body/ul[2]/li")
+
   title=
     tmpl %>%
     xml_find_first(".//a") %>%
     xml_contents() %>%
     as.character()
-  
+
   Title <- gsub('\\n|^\\[Rd\\] *|^R-alpha: *|^\\[R\\] *|^R-beta: *', '', title)
 
   author <- tmpl %>%
@@ -31,29 +31,29 @@ get_rdevel <- function(ym, site = 'r-devel'){
     xml_contents() %>%
     as.character()
   Author <- gsub('\\n', '', author)
-  
-  
+
+
   url =
     tmpl %>%
-    xml_find_first(".//a") %>% 
+    xml_find_first(".//a") %>%
     xml_attr("href") %>%
     paste0(dir,"/",.)
-  
+
   Replies =
     sapply(tmpl, function(node) {
       return(node %>% xml_find_all(".//li") %>% length())
     })
-  
+
   Time = paste0(Month, '-01')
-  
-  
+
+
   return(list(
     replies = data.frame(Month, Replies, Title, url, Time, stringsAsFactors = FALSE),
-    authors = data.frame(Author, Month, stringsAsFactors = FALSE) %>% 
-      group_by(Month, Author) %>% 
+    authors = data.frame(Author, Month, stringsAsFactors = FALSE) %>%
+      group_by(Month, Author) %>%
       summarise(Replies = n())
     ))
-  
+
 }
 
 get_rdeveln <- function(n, site){
@@ -111,15 +111,15 @@ cos_new = cos_js$data$attributes[, cpc]
 cos_new$link = cos_js$data$id
 cos_new <- calc_df_cos(cos_new)
 
-df_rdevelcsv <- bind_rows(df_rdevelcsv, rdevel_new$replies)
+df_rdevelcsv <- bind_rows(rdevel_new$replies, df_rdevelcsv)
 df_rdevelcsv <- df_rdevelcsv[!duplicated(df_rdevelcsv$url), ]
 
-df_rhelpcsv <- bind_rows(df_rhelpcsv, rhelp_new$replies)
+df_rhelpcsv <- bind_rows(rhelp_new$replies, df_rhelpcsv)
 df_rhelpcsv <- df_rhelpcsv[!duplicated(df_rhelpcsv$url), ]
 
-df_coscsv <- bind_rows(df_coscsv, cos_new)
-df_coscsv <- df_coscsv[!duplicated(df_coscsv$Title), ]
-
+df_coscsv <- bind_rows(cos_new, df_coscsv)
+url_cos <- gsub('^.*href=([^>]+).*$', '\\1', df_coscsv$Title)
+df_coscsv <- df_coscsv[!duplicated(url_cos), ]
 
 # RDSfile <- 'db_new.RData'
 message('Writing db.Rdata...')
