@@ -100,12 +100,16 @@ calc_df_cos <- function(df){
 # ym <- as.Date(ym)
 # rdevel <- get_rdeveln(ym, site = 'r-devel')
 # rdevel_r <- rdevel$replies
+# rdevel_r$Title <- paste0('<a href=', rdevel_r$url, '>', rdevel_r$Title , '</a>')
+# rdevel_r <- rdevel_r[, - which(names(df_rdevelcsv) == "url")]
 # saveRDS(rdevel_r, 'rdevel.RDS')
 # 
 # ## R help ------
 # 
 # rhelp <- get_rdeveln(ym, site = 'r-help')
 # rhelp_r <- rhelp$replies
+# rhelp_r$Title <- paste0('<a href=', rhelp_r$url, '>', rhelp_r$Title , '</a>')
+# rhelp_r <- rhelp_r[, - which(names(df_rhelpcsv) == "url")]
 # saveRDS(rhelp_r, 'rhelp.RDS')
 # 
 # ## COSX ------
@@ -180,6 +184,10 @@ newmonth <- Sys.Date()
 # # download the data that are not in db.RData
 rdevel_new <- get_rdeveln(yms = newmonth, site = 'r-devel')
 rhelp_new <- get_rdeveln(yms = newmonth, site = 'r-help')
+rdevel_new$Title <- paste0('<a href=', rdevel_new$url, '>', rdevel_new$Title , '</a>')
+rdevel_new <- rdevel_new[, - which(names(rdevel_new) == "url")]
+rhelp_new$Title <- paste0('<a href=', rhelp_new$url, '>', rhelp_new$Title , '</a>')
+rhelp_new <- rhelp_new[, - which(names(rhelp_new) == "url")]
 
 cos_js <- fromJSON('https://d.cosx.org/api/discussions?page%5Blimit%5D=50&page%5Boffset%5D')
 cpc <- c('title', 'commentCount', 'participantCount', 'createdAt', 'lastPostedAt')
@@ -189,10 +197,12 @@ cos_new <- calc_df_cos(cos_new)
 
 ### merge data
 df_rdevelcsv <- bind_rows(rdevel_new$replies, df_rdevelcsv)
-df_rdevelcsv <- df_rdevelcsv[!duplicated(df_rdevelcsv$url), ]
+url_rdevel <- gsub('^.*href=([^>]+).*$', '\\1', df_rdevelcsv$Title)
+df_rdevelcsv <- df_rdevelcsv[!duplicated(url_rdevel), ]
 
 df_rhelpcsv <- bind_rows(rhelp_new$replies, df_rhelpcsv)
-df_rhelpcsv <- df_rhelpcsv[!duplicated(df_rhelpcsv$url), ]
+url_rhelp <- gsub('^.*href=([^>]+).*$', '\\1', df_rhelpcsv$Title)
+df_rhelpcsv <- df_rhelpcsv[!duplicated(url_rhelp), ]
 
 df_coscsv <- bind_rows(cos_new, df_coscsv)
 url_cos <- gsub('^.*href=([^>]+).*$', '\\1', df_coscsv$Title)
