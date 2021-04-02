@@ -218,5 +218,6 @@ df_coscsv <- df_coscsv[!duplicated(url_cos), ]
 # write the data file -------------------------------------------
 message('Writing db.Rdata...')
 save(file = RDSfile, list = c('df_coscsv', 'df_rdevelcsv', 'df_rhelpcsv', 'msg'))
+write(Sys.time(), "data/log.txt", append = TRUE)
 message('Well done!')
 
