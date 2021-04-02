@@ -18,6 +18,9 @@ get_rdevel <- function(ym, site = 'r-devel'){
   dir = dirname(url)
 
   ## all main thread
+  if (class(try(read_html(url), silent = TRUE))[1] == 'try-error') {
+    return(NULL)
+  } else {
   tmpl =
     read_html(url) %>%
     xml_find_all("//body/ul[2]/li")
@@ -54,6 +57,7 @@ get_rdevel <- function(ym, site = 'r-devel'){
       group_by(Month, Author) %>%
       summarise(Replies = n())
     ))
+  }
 }
 
 ## get multiple months from r devel or r help --------------------------
@@ -92,7 +96,7 @@ calc_df_cos <- function(df){
 
 
 # # Get the complete database ---------------------------------------------------------------
-# 
+#
 # ## R dev ------
 # sysdate <- Sys.Date()
 # ym_seq <- seq(1997 + 1 / 12 * 3, as.numeric(format(sysdate, "%Y")) + 1 / 12 * (as.numeric(format(sysdate, "%m")) - 1), 1 / 12)
@@ -103,15 +107,15 @@ calc_df_cos <- function(df){
 # rdevel_r$Title <- paste0('<a href=', rdevel_r$url, '>', rdevel_r$Title , '</a>')
 # rdevel_r <- rdevel_r[, - which(names(df_rdevelcsv) == "url")]
 # saveRDS(rdevel_r, 'rdevel.RDS')
-# 
+#
 # ## R help ------
-# 
+#
 # rhelp <- get_rdeveln(ym, site = 'r-help')
 # rhelp_r <- rhelp$replies
 # rhelp_r$Title <- paste0('<a href=', rhelp_r$url, '>', rhelp_r$Title , '</a>')
 # rhelp_r <- rhelp_r[, - which(names(df_rhelpcsv) == "url")]
 # saveRDS(rhelp_r, 'rhelp.RDS')
-# 
+#
 # ## COSX ------
 # # get the max page (1422 pages on  2019-06-18, 1471 pages on 2021-03-29)
 # get_maxpage <- function(page_range = 1421:1500){
@@ -127,7 +131,7 @@ calc_df_cos <- function(df){
 #     }
 #   }
 # }
-# 
+#
 # # get json from cos
 # get_js <- function(url){
 #   # url <- cos_url[1]
@@ -136,29 +140,29 @@ calc_df_cos <- function(df){
 #   if(class(mytry) == 'try-error') return(NULL)
 #   jsonlite::fromJSON(url)
 # }
-# 
+#
 # # extract dataframe from js
 # get_cosdf <- function(l) {
 #   df = l$data$attributes
 #   df$link = paste0("https://d.cosx.org/d/", l$data$id)
 #   return(df)
 # }
-# 
+#
 # get_cosauthor <- function(l){
 #   authors <- unlist(l$included$attributes$username)
 #   authors <- authors[!is.na(authors)]
 # }
-# 
+#
 # maxpage <- get_maxpage(1470:2100)
 # cos_url <- paste0('https://d.cosx.org/api/discussions?page%5Blimit%5D=50&page%5Boffset%5D=', seq(0, maxpage * 20, 50) + 50)
-# 
+#
 # cos_js <- lapply(cos_url, get_js)
 # # saveRDS(cos_js, 'cos_js.RDS')
 # cos_ls <- lapply(cos_js, get_cosdf)
 # cos_author <- unlist(sapply(cos_js, get_cosauthor))
 # cos_author_df <- as.data.frame(table(cos_author))
 # cos_author_df <- cos_author_df[order(-cos_author_df$Freq), ]
-# 
+#
 # cpc <- c('title', 'commentCount', 'participantCount', 'createdAt', 'lastPostedAt', 'link')
 # cos_df <- dplyr::bind_rows(cos_ls)
 # cos_df <- cos_df[, cpc]
