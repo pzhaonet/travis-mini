@@ -21,41 +21,41 @@ get_rdevel <- function(ym, site = 'r-devel'){
   if (class(try(read_html(url), silent = TRUE))[1] == 'try-error') {
     return(NULL)
   } else {
-  tmpl =
-    read_html(url) %>%
-    xml_find_all("//body/ul[2]/li")
+    tmpl =
+      read_html(url) %>%
+      xml_find_all("//body/ul[2]/li")
 
-  title=
-    tmpl %>%
-    xml_find_first(".//a") %>%
-    xml_contents() %>%
-    as.character()
+    title=
+      tmpl %>%
+      xml_find_first(".//a") %>%
+      xml_contents() %>%
+      as.character()
 
-  Title <- gsub('\\n|^\\[Rd\\] *|^R-alpha: *|^\\[R\\] *|^R-beta: *', '', title)
+    Title <- gsub('\\n|^\\[Rd\\] *|^R-alpha: *|^\\[R\\] *|^R-beta: *', '', title)
 
-  author <- tmpl %>%
-    xml_find_all(".//i") %>%
-    xml_contents() %>%
-    as.character()
-  Author <- gsub('\\n', '', author)
+    author <- tmpl %>%
+      xml_find_all(".//i") %>%
+      xml_contents() %>%
+      as.character()
+    Author <- gsub('\\n', '', author)
 
 
-  url =
-    tmpl %>%
-    xml_find_first(".//a") %>%
-    xml_attr("href") %>%
-    paste0(dir,"/",.)
+    url =
+      tmpl %>%
+      xml_find_first(".//a") %>%
+      xml_attr("href") %>%
+      paste0(dir,"/",.)
 
-  Replies =
-    sapply(tmpl, function(node) {
-      return(node %>% xml_find_all(".//li") %>% length())
-    })
+    Replies =
+      sapply(tmpl, function(node) {
+        return(node %>% xml_find_all(".//li") %>% length())
+      })
 
-  return(list(
-    replies = data.frame(Month, Replies, Title, url, stringsAsFactors = FALSE),
-    authors = data.frame(Author, Month, stringsAsFactors = FALSE) %>%
-      group_by(Month, Author) %>%
-      summarise(Replies = n())
+    return(list(
+      replies = data.frame(Month, Replies, Title, url, stringsAsFactors = FALSE),
+      authors = data.frame(Author, Month, stringsAsFactors = FALSE) %>%
+        group_by(Month, Author) %>%
+        summarise(Replies = n())
     ))
   }
 }
@@ -188,10 +188,6 @@ newmonth <- Sys.Date()
 # # download the data that are not in db.RData
 rdevel_new <- get_rdeveln(yms = newmonth, site = 'r-devel')
 rhelp_new <- get_rdeveln(yms = newmonth, site = 'r-help')
-rdevel_new$Title <- paste0('<a href=', rdevel_new$url, '>', rdevel_new$Title , '</a>')
-rdevel_new <- rdevel_new[, - which(names(rdevel_new) == "url")]
-rhelp_new$Title <- paste0('<a href=', rhelp_new$url, '>', rhelp_new$Title , '</a>')
-rhelp_new <- rhelp_new[, - which(names(rhelp_new) == "url")]
 
 cos_js <- fromJSON('https://d.cosx.org/api/discussions?page%5Blimit%5D=50&page%5Boffset%5D')
 cpc <- c('title', 'commentCount', 'participantCount', 'createdAt', 'lastPostedAt')
@@ -200,14 +196,21 @@ cos_new$link = cos_js$data$id
 cos_new <- calc_df_cos(cos_new)
 
 ### merge data
-df_rdevelcsv <- bind_rows(rdevel_new$replies, df_rdevelcsv)
-url_rdevel <- gsub('^.*href=([^>]+).*$', '\\1', df_rdevelcsv$Title)
-df_rdevelcsv <- df_rdevelcsv[!duplicated(url_rdevel), ]
+if (length(rdevel_new$replies) > 0) {
+  rdevel_new$Title <- paste0('<a href=', rdevel_new$url, '>', rdevel_new$Title , '</a>')
+  rdevel_new <- rdevel_new[, - which(names(rdevel_new) == "url")]
+  df_rdevelcsv <- bind_rows(rdevel_new$replies, df_rdevelcsv)
+  url_rdevel <- gsub('^.*href=([^>]+).*$', '\\1', df_rdevelcsv$Title)
+  df_rdevelcsv <- df_rdevelcsv[!duplicated(url_rdevel), ]
+}
 
-df_rhelpcsv <- bind_rows(rhelp_new$replies, df_rhelpcsv)
-url_rhelp <- gsub('^.*href=([^>]+).*$', '\\1', df_rhelpcsv$Title)
-df_rhelpcsv <- df_rhelpcsv[!duplicated(url_rhelp), ]
-
+if (length(rhelp_new$replies) > 0) {
+  rhelp_new$Title <- paste0('<a href=', rhelp_new$url, '>', rhelp_new$Title , '</a>')
+  rhelp_new <- rhelp_new[, - which(names(rhelp_new) == "url")]
+  df_rhelpcsv <- bind_rows(rhelp_new$replies, df_rhelpcsv)
+  url_rhelp <- gsub('^.*href=([^>]+).*$', '\\1', df_rhelpcsv$Title)
+  df_rhelpcsv <- df_rhelpcsv[!duplicated(url_rhelp), ]
+}
 df_coscsv <- bind_rows(cos_new, df_coscsv)
 url_cos <- gsub('^.*href=([^>]+).*$', '\\1', df_coscsv$Title)
 df_coscsv <- df_coscsv[!duplicated(url_cos), ]
