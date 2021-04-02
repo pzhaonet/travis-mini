@@ -186,8 +186,8 @@ message('update db.Rdata...')
 # newmonth <- 1 #ceiling(as.numeric(as.duration(last_update),  'months'))
 newmonth <- Sys.Date()
 # # download the data that are not in db.RData
-rdevel_new <- get_rdeveln(yms = newmonth, site = 'r-devel')
-rhelp_new <- get_rdeveln(yms = newmonth, site = 'r-help')
+rdevel_new <- get_rdeveln(yms = newmonth, site = 'r-devel')$replies
+rhelp_new <- get_rdeveln(yms = newmonth, site = 'r-help')$replies
 
 cos_js <- fromJSON('https://d.cosx.org/api/discussions?page%5Blimit%5D=50&page%5Boffset%5D')
 cpc <- c('title', 'commentCount', 'participantCount', 'createdAt', 'lastPostedAt')
@@ -196,7 +196,7 @@ cos_new$link = cos_js$data$id
 cos_new <- calc_df_cos(cos_new)
 
 ### merge data
-if (length(rdevel_new$replies) > 0) {
+if (length(rdevel_new) > 0) {
   rdevel_new$Title <- paste0('<a href=', rdevel_new$url, '>', rdevel_new$Title , '</a>')
   rdevel_new <- rdevel_new[, - which(names(rdevel_new) == "url")]
   df_rdevelcsv <- bind_rows(rdevel_new$replies, df_rdevelcsv)
@@ -204,7 +204,7 @@ if (length(rdevel_new$replies) > 0) {
   df_rdevelcsv <- df_rdevelcsv[!duplicated(url_rdevel), ]
 }
 
-if (length(rhelp_new$replies) > 0) {
+if (length(rhelp_new) > 0) {
   rhelp_new$Title <- paste0('<a href=', rhelp_new$url, '>', rhelp_new$Title , '</a>')
   rhelp_new <- rhelp_new[, - which(names(rhelp_new) == "url")]
   df_rhelpcsv <- bind_rows(rhelp_new$replies, df_rhelpcsv)
